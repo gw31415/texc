@@ -1,15 +1,15 @@
-#これは何
+# これは何
 LaTeXのオンラインコンパイラのtex.amas.devを使う際のスクリプト.
 # インストール
 ## システム要件
-* Bourne Shell互換のシェル (sh, bash, zshなど, fishやcmdはムリ)
+* Bourne Shell互換のシェル (sh, bash, zshなど. fishやcmdはムリ)
 * cURLのコマンド
 ## インストール方法
 1. ダウンロードする
 1. (必要なら)実行権限をつける (`chmod +x ./texc` とか)
 1. (必要なら)パスを通す
 # 使い方の例
-以下を実行する
+引数が必要. 以下を実行する
 ```
 texc ./path/to/example.tex
 ```
