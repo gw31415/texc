@@ -6,11 +6,20 @@ LaTeXのオンラインコンパイラのtex.amas.devを使う際のスクリプ
 * cURLのコマンド
 ## インストール方法
 1. ダウンロードする
-1. (必要なら)実行権限をつける (`chmod +x ./texc` とか)
-1. (必要なら)パスを通す
+``` bash
+curl -O https://github.com/gw31415/texc/raw/master/texc
+```
+2. (必要なら)実行権限をつける
+``` bash
+chmod +x ./texc
+```
+3. (必要なら)パスを通す, 通ったところに移動する.
+``` bash
+sudo mv ./texc /usr/local/bin/
+```
 # 使い方の例
 引数が必要. 以下を実行する
-```
+``` bash
 texc ./path/to/example.tex
 ```
 現在のディレクトリに `example.pdf` が出てきます
