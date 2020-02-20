@@ -7,7 +7,7 @@ LaTeXのオンラインコンパイラのtex.amas.devを使う際のスクリプ
 ## インストール方法
 1. ダウンロードする
 ``` bash
-curl -O https://github.com/gw31415/texc/raw/master/texc
+curl -O https://raw.githubusercontent.com/gw31415/texc/master/texc
 ```
 2. (必要なら)実行権限をつける
 ``` bash

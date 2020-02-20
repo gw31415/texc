@@ -2,15 +2,18 @@
 if [ $# -eq 1 ]; then
   env="default"
   file=$1
+  save=$file
 elif [ $# -eq 2 ] && [ $1 = '-l' ]; then
   echo "{ \"main\": \"$2\" }" > tmp.texc.json
-  tar -cf tmp.texc.tar *
+  tar -cf tmp_texc.tar *
   env="latexmk"
-  file="tmp.tar"
+  file="tmp_texc.tar"
+  save=$2
 elif [ $# -eq 2 ] && [ $1 = '-p' ]; then
   env="pdflatex"
   file=$2
+  save=$file
 fi
 script -c "curl -X POST  -F file=@$file https://tex.amas.dev/$env" -q /dev/null | tee tmp.texc.log
-echo $1 | awk -F/ '{gsub (/\.[^/.]*$/,"",$NF);print $NF}' | (read name ; cat texc.log | tac | (read tmp ; echo $tmp | tr -d '\r' | tr -d '\n' | (read url ; curl -so $name.pdf $url)))
-rm tmp.texc.*
+basename $save | (read name ; cat tmp.texc.log | tac | (read tmp ; echo $tmp | tr -d '\r' | tr -d '\n' | (read url ; curl -so ${name%.*}.pdf $url ; echo "File saved: $name.pdf")))
+rm tmp_texc.* tmp.texc.*
