@@ -1,0 +1,4 @@
+#/bin/sh!
+script -c "curl -X POST  -F file=@$1 https://tex.amas.dev/default" -q /dev/null | tee texc.log
+echo $1 | awk -F/ '{gsub (/\.[^/.]*$/,"",$NF);print $NF}' | (read name ; cat texc.log | tac | (read tmp ; echo $tmp | tr -d '\r' | tr -d '\n' | (read url ; curl -so $name.pdf $url)))
+rm texc.log
