@@ -37,7 +37,8 @@ texc ./path/to/example.tex
 cd path/to/project
 texc -l ./main.tex
 ```
-現在のディレクトリに `main.pdf` が出てきます
+プロジェクトのディレクトリに `main.pdf` が出てきます
+* 必ずプロジェクトのディレクトリまで移動してから行ってください
 * デフォルトは uplatex + dvipdfmx を latexmkで括ったもの
 * latexmkを使います
 # 環境
