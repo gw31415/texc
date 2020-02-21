@@ -3,7 +3,7 @@ LaTeXのオンラインコンパイラのtex.amas.devを使う際のスクリプ
 # インストール
 ## システム要件
 * Bourne Shell互換のシェル (sh, bash, zshなど. fishやcmdはムリ)
-* cURLのコマンド
+* tarとcURLのコマンド
 ## インストール方法
 ### これだけ
 ``` bash
