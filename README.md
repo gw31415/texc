@@ -5,6 +5,12 @@ LaTeXのオンラインコンパイラのtex.amas.devを使う際のスクリプ
 * Bourne Shell互換のシェル (sh, bash, zshなど. fishやcmdはムリ)
 * cURLのコマンド
 ## インストール方法
+### これだけ
+``` bash
+curl -o ~/.texc https://raw.githubusercontent.com/gw31415/texc/master/texc ; chmod +x ~/.texc ; sudo ln -s ~/.texc /usr/local/bin/texc
+```
+
+### 詳細
 1. ダウンロードする
 ``` bash
 curl -O https://raw.githubusercontent.com/gw31415/texc/master/texc
@@ -15,17 +21,27 @@ chmod +x ./texc
 ```
 3. (必要なら)パスを通す, 通ったところに移動する.
 ``` bash
-sudo mv ./texc /usr/local/bin/
+mv ./texc ~/texc
+sudo ln -s ~/.texc /usr/local/bin/texc
 ```
 # 使い方の例
-引数が必要. 以下を実行する
+## texをpdfにする
 ``` bash
 texc ./path/to/example.tex
 ```
 現在のディレクトリに `example.pdf` が出てきます
+* 環境は uplatex + dvipdfmx を latexmkで括ったもの
+* latexmkを使います
+## 複数ファイルにまたがる、または独自の設定を用いる場合
+``` bash
+cd path/to/project
+texc -l ./main.tex
+```
+現在のディレクトリに `main.pdf` が出てきます
+* デフォルトは uplatex + dvipdfmx を latexmkで括ったもの
+* latexmkを使います
 # 環境
 * texlive2019
-* uplatex + dvipdfmx を latexmkで括ったもの
 * `.latexmkrc`は以下みたいな感じ
 ``` perl
 #!/usr/bin/env perl
