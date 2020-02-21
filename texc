@@ -4,9 +4,13 @@
   this=$(cat $0 | sha256sum)
   origin=$(readlink -f $0)
   if [ "$that" != "$this" ] && [ "$TEXC_DEV" != "true" ] && [ ! -e "$(dirname $origin)/.texc_dev" ]; then
-    curl -o $origin https://raw.githubusercontent.com/gw31415/texc/master/texc
+    set -e
+    curl -so $origin https://raw.githubusercontent.com/gw31415/texc/master/texc
+    echo "\033[32;4m> TEXC has been upgraded.\033[m"
   fi
 )&
+
+set -e
 
 [ "${BASH_VERSION:-}" ] && shopt -s expand_aliases
 [ $(echo -e) ] || alias echo='echo -e'
@@ -19,7 +23,8 @@ if [ $# -eq 1 ]; then
 elif [ $# -eq 2 ] && [ $1 = '-l' ]; then
   echo "\033[32m> mode:[latexmk]\033[m"
   echo "{ \"main\": \"$2\" }" > tmp.texc.json
-  tar -cf tmp_texc.tar *
+  echo "\033[34;1;4m> Packing ...\033[m\033[33m"
+  tar -cvf tmp_texc.tar *
   env="latexmk"
   file="tmp_texc.tar"
   save=$2
@@ -29,10 +34,23 @@ elif [ $# -eq 2 ] && [ $1 = '-p' ]; then
   file=$2
   save=$file
 fi
+
+if [ ! -e $file ]; then
+  echo "\033[31;1m> ERROR: \"$file\" does not exist.\033[m"
+  exit
+fi
+
 echo "\033[34;1;4m> POSTing $file ...\033[m"
 script -c "curl -X POST  -F file=@$file https://tex.amas.dev/$env" -q /dev/null | tee tmp.texc.log
+name=$(basename $save)
+url=$(cat tmp.texc.log | tac | (read tmp ; echo $tmp | tr -d '\r' | tr -d '\n'))
+if [ $url = "ERROR" ]; then
+  echo "\033[31;1m> ERROR: An error has occured.\033[m"
+  exit
+fi
 echo "\033[34;1;4m> Downloading ...\033[m"
-basename $save | (read name ; cat tmp.texc.log | tac | (read tmp ; echo $tmp | tr -d '\r' | tr -d '\n' | (read url ; curl -so ${name%.*}.pdf $url ; echo "  \033[32mFile saved: ${name%.*}.pdf\033[m")))
+curl -so ${name%.*}.pdf $url
+echo "  \033[32mFile saved: ${name%.*}.pdf\033[m"
 echo "\033[34;1;4m> Cleanup ...\033[m"
 rm -f tmp_texc.* tmp.texc.*
-echo "\033[34;1;4m> Done.\033[m"
+echo "\033[34;1;4m> Done!\033[m"
