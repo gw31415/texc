@@ -1,4 +1,4 @@
-#/bin/bash!
+#/bin/sh!
 [ "${BASH_VERSION:-}" ] && shopt -s expand_aliases
 [ $(echo -e) ] || alias echo='echo -e'
 
@@ -42,6 +42,13 @@ elif [ $# -eq 2 ] && [ $1 = '-p' ]; then
   env="pdflatex"
   file=$2
   save=$file
+elif [ $# -eq 0 ]; then
+  echo "\033[;1m> TEXC\033[m"
+  echo "\033[;1m>\033[m  usage: texc [OPTIONS] FILE"
+  echo "\033[;1m>\033[m\033[32m    -l    Use latexmk. FILE is a file which it start LaTeX file.\033[m"
+  echo "\033[;1m>\033[m\033[32m          Please execute this command at the directory where is the project.\033[m"
+  echo "\033[;1m>\033[m\033[32m          You can include .latexmk file.\033[m"
+  exit
 fi
 
 if [ ! -e $file ]; then
