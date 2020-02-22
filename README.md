@@ -43,7 +43,7 @@ texc -l ./main.tex
 * latexmkを使います
 # 環境
 * texlive2019
-* `.latexmkrc`は以下みたいな感じ
+* デフォルトの`.latexmkrc`は以下みたいな感じ
 ``` perl
 #!/usr/bin/env perl
 $latex            = 'uplatex -halt-on-error -interaction=nonstopmode';
