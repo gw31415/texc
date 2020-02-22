@@ -1,5 +1,10 @@
 #/bin/sh!
 # vim: set ft=sh:
+if [ $(curl -s https://google.com) = "" ]; then
+  echo "\033[31;1m> ERROR: \"$file\" Could not connect to server.\033[m"
+  exit
+fi
+
 [ "${BASH_VERSION:-}" ] && shopt -s expand_aliases
 [ $(echo -e) ] || alias echo='echo -e'
 
