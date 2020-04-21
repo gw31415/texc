@@ -21,7 +21,7 @@ chmod +x ./texc
 ```
 3. (必要なら)パスを通す, 通ったところに移動する.
 ``` bash
-mv ./texc ~/texc
+mv ./texc ~/.texc
 sudo ln -s ~/.texc /usr/local/bin/texc
 ```
 # 使い方の例
