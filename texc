@@ -63,6 +63,7 @@ elif [ $# -eq 0 ]; then
   echo "\033[;1m>\033[m\033[32m    -l    Use latexmk. FILE is a file which it start LaTeX file.\033[m"
   echo "\033[;1m>\033[m\033[32m          Please execute this command at the directory where is the project.\033[m"
   echo "\033[;1m>\033[m\033[32m          You can include .latexmk file.\033[m"
+  echo "\033[;1m>\033[m\033[32m    -j    Make JPEG image. your Environment is restricted.\033[m"
   exit
 fi
 
