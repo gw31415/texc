@@ -42,6 +42,7 @@ texc -l ./main.tex
 * 必ずプロジェクトのディレクトリまで移動してから行ってください
 * デフォルトは uplatex + dvipdfmx を latexmkで括ったもの
 * latexmkを使います
+* `.latexmk` を同梱することができます
 # 環境
 * texlive2019
 * デフォルトの`.latexmkrc`は以下みたいな感じ
