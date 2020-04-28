@@ -14,12 +14,23 @@ texc_cleanup () {
 }
 trap 'texc_cleanup' 2
 (
-  that=$(curl -s https://raw.githubusercontent.com/gw31415/texc/master/texc | sha256sum)
-  this=$(cat $0 | sha256sum)
-  origin=$(readlink -f $0)
+  that=$(curl -s https://raw.githubusercontent.com/gw31415/texc/master/texc | shasum)
+  this=$(cat $0 | shasum)
+
+  # readlink -f の代替
+  if [ "$(readlink $0)" = "" ]; then
+    origin=$0
+  else
+    origin=$(readlink $0)
+    while [ "$(readlink $origin)" != "" ]
+    do
+      origin=$(readlink $origin)
+    done
+  fi
+
   if [ "$that" != "$this" ] && [ "$TEXC_DEV" != "true" ] && [ ! -e "$(dirname $origin)/.texc_dev" ]; then
     set -e
-    curl -so $origin https://raw.githubusercontent.com/gw31415/texc/master/texc
+    curl -so $origin https://raw.githubusercontent.com/gw31415/texc/mac_support/texc
     echo "\033[32;4m> TEXC has been upgraded.\033[m"
   fi
 )&
@@ -73,9 +84,9 @@ if [ ! -e $file ]; then
 fi
 
 echo "\033[34;1;4m> POSTing $file ...\033[m"
-script -c "curl -X POST  -F file=@$file https://tex.amas.dev/$env" -q /dev/null | tee tmp.texc.log
+script -aq /dev/null curl -X POST  -F file=@$file https://tex.amas.dev/$env | tee tmp.texc.log  # script -c の代替
 name=$(basename $save)
-url=$(cat tmp.texc.log | tac | (read tmp ; echo $tmp | tr -d '\r' | tr -d '\n'))
+url=$(tail -n 1 tmp.texc.log | (read tmp ; echo $tmp | tr -d '\r' | tr -d '\n'))  # tac の代替
 if [ $url = "ERROR" ]; then
   echo "\033[31;1m> ERROR: An error has occured.\033[m"
   exit
