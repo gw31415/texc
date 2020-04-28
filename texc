@@ -78,6 +78,7 @@ name=$(basename $save)
 url=$(cat tmp.texc.log | tac | (read tmp ; echo $tmp | tr -d '\r' | tr -d '\n'))
 if [ $url = "ERROR" ]; then
   echo "\033[31;1m> ERROR: An error has occured.\033[m"
+  texc_cleanup
   exit
 fi
 echo "\033[34;1;4m> Downloading ...\033[m"
