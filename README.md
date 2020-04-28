@@ -8,13 +8,13 @@ LaTeXのオンラインコンパイラのtex.amas.devを使う際のスクリプ
 ## インストール方法
 ### これだけ
 ``` bash
-curl -o ~/.texc https://raw.githubusercontent.com/gw31415/texc/master/texc ; chmod +x ~/.texc ; sudo ln -s ~/.texc /usr/local/bin/texc
+curl -o ~/.texc https://raw.githubusercontent.com/gw31415/texc/mac_support/texc ; chmod +x ~/.texc ; sudo ln -s ~/.texc /usr/local/bin/texc
 ```
 
 ### 詳細
 1. ダウンロードする
 ``` bash
-curl -O https://raw.githubusercontent.com/gw31415/texc/master/texc
+curl -O https://raw.githubusercontent.com/gw31415/texc/mac_support/texc
 ```
 2. (必要なら)実行権限をつける
 ``` bash
