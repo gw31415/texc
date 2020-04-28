@@ -1,25 +1,29 @@
 #/bin/sh!
 # vim: set ft=sh:
-if [ "$(curl -s https://google.com)" = "" ]; then
+
+# fix Color
+[ "${BASH_VERSION:-}" ] && shopt -s expand_aliases
+[ $(echo -e) ] || alias echo='echo -e'
+
+# online check
+if [ "$(curl -Ls https://tex.amas.dev/ping)" = "OK\n" ]; then
   echo "\033[31;1m> ERROR: \"$file\" Could not connect to server.\033[m"
   exit
 fi
-
-[ "${BASH_VERSION:-}" ] && shopt -s expand_aliases
-[ $(echo -e) ] || alias echo='echo -e'
 
 texc_cleanup () {
   echo "\033[34;1;4m> Cleanup ...\033[m"
   rm -f tmp_texc.* tmp.texc.*
 }
 trap 'texc_cleanup' 2
+# auto update
 (
-  that=$(curl -s https://raw.githubusercontent.com/gw31415/texc/master/texc | sha256sum)
+  that=$(curl -Ls https://raw.githubusercontent.com/gw31415/texc/master/texc | sha256sum)
   this=$(cat $0 | sha256sum)
   origin=$(readlink -f $0)
   if [ "$that" != "$this" ] && [ "$TEXC_DEV" != "true" ] && [ ! -e "$(dirname $origin)/.texc_dev" ]; then
     set -e
-    curl -so $origin https://raw.githubusercontent.com/gw31415/texc/master/texc
+    curl -sLo $origin https://raw.githubusercontent.com/gw31415/texc/master/texc
     echo "\033[32;4m> TEXC has been upgraded.\033[m"
   fi
 )&
@@ -73,7 +77,7 @@ if [ ! -e $file ]; then
 fi
 
 echo "\033[34;1;4m> POSTing $file ...\033[m"
-script -c "curl -X POST  -F file=@$file https://tex.amas.dev/$env" -q /dev/null | tee tmp.texc.log
+script -c "curl -LX POST  -F file=@$file https://tex.amas.dev/$env" -q /dev/null | tee tmp.texc.log
 name=$(basename $save)
 url=$(cat tmp.texc.log | tac | (read tmp ; echo $tmp | tr -d '\r' | tr -d '\n'))
 if [ $url = "ERROR" ]; then
@@ -82,7 +86,7 @@ if [ $url = "ERROR" ]; then
   exit
 fi
 echo "\033[34;1;4m> Downloading ...\033[m"
-curl -so ${name%.*}.$ext $url
+curl -sLo ${name%.*}.$ext $url
 echo "  \033[32mFile saved: ${name%.*}.$ext\033[m"
 texc_cleanup
 echo "\033[34;1;4m> Done!\033[m"
