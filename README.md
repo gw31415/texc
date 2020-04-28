@@ -1,3 +1,4 @@
+<a href="https://asciinema.org/a/2z2ddsoonJZQW3gjGyFFL9VhK" target="_blank"><img src="https://asciinema.org/a/2z2ddsoonJZQW3gjGyFFL9VhK.svg" /></a>
 # これは何
 LaTeXのオンラインコンパイラのtex.amas.devを使う際のスクリプト.
 # インストール
@@ -41,6 +42,7 @@ texc -l ./main.tex
 * 必ずプロジェクトのディレクトリまで移動してから行ってください
 * デフォルトは uplatex + dvipdfmx を latexmkで括ったもの
 * latexmkを使います
+* `.latexmk` を同梱することができます
 # 環境
 * texlive2019
 * デフォルトの`.latexmkrc`は以下みたいな感じ
