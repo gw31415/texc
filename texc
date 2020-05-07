@@ -72,14 +72,19 @@ elif [ $# -eq 2 ] && [ $1 = '-j' ]; then
   save=$file
   ext="jpg"
 elif [ $# -eq 0 ]; then
-  echo "\033[;1m> TEXC\033[m"
+  echo "\033[;1m> TeXC\033[m"
+  echo "\033[;1m>\033[m Online LaTeX compiler"
+  echo "\033[;1m>"
+  echo "\033[;1m> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
   echo "\033[;1m>\033[m  usage: texc [OPTIONS] FILE"
   echo "\033[;1m>"
   echo "\033[;1m>\033[m\033[32m [OPTIONS]\033[m"
-  echo "\033[;1m>\033[m\033[32m    -l    Use latexmk. FILE is a file which it start LaTeX file.\033[m"
-  echo "\033[;1m>\033[m\033[32m          Please execute this command at the directory where is the project.\033[m"
-  echo "\033[;1m>\033[m\033[32m          You can include .latexmk file.\033[m"
-  echo "\033[;1m>\033[m\033[32m    -j    Make JPEG image. your Environment is restricted.\033[m"
+  echo "\033[;1m>\033[m\033[32m <nothing> Compile single LaTeX file. This uses latexmk(uplatex + dvipdfmx).\033[m"
+  echo "\033[;1m>\033[m\033[32m    -l     Use latexmk. FILE is a file which it start LaTeX file.\033[m"
+  echo "\033[;1m>\033[m\033[32m           Please execute this command at the directory where is the project.\033[m"
+  echo "\033[;1m>\033[m\033[32m           You can include .latexmk file.\033[m"
+  echo "\033[;1m>\033[m\033[32m    -j     Make JPEG image. Your environment is restricted.\033[m"
+  echo "\033[;1m>"
   exit
 fi
 
