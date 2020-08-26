@@ -29,16 +29,17 @@ const (
 // of the legacy proto package is being used.
 const _ = proto.ProtoPackageIsVersion4
 
-type Data struct {
+type Input struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Data []byte `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
+	Data []byte   `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
+	Exec []string `protobuf:"bytes,2,rep,name=exec,proto3" json:"exec,omitempty"`
 }
 
-func (x *Data) Reset() {
-	*x = Data{}
+func (x *Input) Reset() {
+	*x = Input{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_proto_texc_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -46,13 +47,13 @@ func (x *Data) Reset() {
 	}
 }
 
-func (x *Data) String() string {
+func (x *Input) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Data) ProtoMessage() {}
+func (*Input) ProtoMessage() {}
 
-func (x *Data) ProtoReflect() protoreflect.Message {
+func (x *Input) ProtoReflect() protoreflect.Message {
 	mi := &file_proto_texc_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -64,14 +65,76 @@ func (x *Data) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Data.ProtoReflect.Descriptor instead.
-func (*Data) Descriptor() ([]byte, []int) {
+// Deprecated: Use Input.ProtoReflect.Descriptor instead.
+func (*Input) Descriptor() ([]byte, []int) {
 	return file_proto_texc_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Data) GetData() []byte {
+func (x *Input) GetData() []byte {
 	if x != nil {
 		return x.Data
+	}
+	return nil
+}
+
+func (x *Input) GetExec() []string {
+	if x != nil {
+		return x.Exec
+	}
+	return nil
+}
+
+type Output struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Data   []byte `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
+	Stdout []byte `protobuf:"bytes,2,opt,name=stdout,proto3" json:"stdout,omitempty"`
+}
+
+func (x *Output) Reset() {
+	*x = Output{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_proto_texc_proto_msgTypes[1]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Output) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Output) ProtoMessage() {}
+
+func (x *Output) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_texc_proto_msgTypes[1]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Output.ProtoReflect.Descriptor instead.
+func (*Output) Descriptor() ([]byte, []int) {
+	return file_proto_texc_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *Output) GetData() []byte {
+	if x != nil {
+		return x.Data
+	}
+	return nil
+}
+
+func (x *Output) GetStdout() []byte {
+	if x != nil {
+		return x.Stdout
 	}
 	return nil
 }
@@ -80,13 +143,18 @@ var File_proto_texc_proto protoreflect.FileDescriptor
 
 var file_proto_texc_proto_rawDesc = []byte{
 	0x0a, 0x10, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x74, 0x65, 0x78, 0x63, 0x2e, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x12, 0x05, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x1a, 0x0a, 0x04, 0x44, 0x61, 0x74,
-	0x61, 0x12, 0x12, 0x0a, 0x04, 0x64, 0x61, 0x74, 0x61, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0c, 0x52,
-	0x04, 0x64, 0x61, 0x74, 0x61, 0x32, 0x35, 0x0a, 0x0b, 0x54, 0x65, 0x78, 0x63, 0x53, 0x65, 0x72,
-	0x76, 0x69, 0x63, 0x65, 0x12, 0x26, 0x0a, 0x04, 0x53, 0x79, 0x6e, 0x63, 0x12, 0x0b, 0x2e, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x44, 0x61, 0x74, 0x61, 0x1a, 0x0b, 0x2e, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x2e, 0x44, 0x61, 0x74, 0x61, 0x22, 0x00, 0x28, 0x01, 0x30, 0x01, 0x62, 0x06, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x33,
+	0x74, 0x6f, 0x12, 0x05, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x2f, 0x0a, 0x05, 0x49, 0x6e, 0x70,
+	0x75, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x64, 0x61, 0x74, 0x61, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0c,
+	0x52, 0x04, 0x64, 0x61, 0x74, 0x61, 0x12, 0x12, 0x0a, 0x04, 0x65, 0x78, 0x65, 0x63, 0x18, 0x02,
+	0x20, 0x03, 0x28, 0x09, 0x52, 0x04, 0x65, 0x78, 0x65, 0x63, 0x22, 0x34, 0x0a, 0x06, 0x4f, 0x75,
+	0x74, 0x70, 0x75, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x64, 0x61, 0x74, 0x61, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x0c, 0x52, 0x04, 0x64, 0x61, 0x74, 0x61, 0x12, 0x16, 0x0a, 0x06, 0x73, 0x74, 0x64, 0x6f,
+	0x75, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x06, 0x73, 0x74, 0x64, 0x6f, 0x75, 0x74,
+	0x32, 0x38, 0x0a, 0x0b, 0x54, 0x65, 0x78, 0x63, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12,
+	0x29, 0x0a, 0x04, 0x53, 0x79, 0x6e, 0x63, 0x12, 0x0c, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e,
+	0x49, 0x6e, 0x70, 0x75, 0x74, 0x1a, 0x0d, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x4f, 0x75,
+	0x74, 0x70, 0x75, 0x74, 0x22, 0x00, 0x28, 0x01, 0x30, 0x01, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74,
+	0x6f, 0x33,
 }
 
 var (
@@ -101,13 +169,14 @@ func file_proto_texc_proto_rawDescGZIP() []byte {
 	return file_proto_texc_proto_rawDescData
 }
 
-var file_proto_texc_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_proto_texc_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_proto_texc_proto_goTypes = []interface{}{
-	(*Data)(nil), // 0: proto.Data
+	(*Input)(nil),  // 0: proto.Input
+	(*Output)(nil), // 1: proto.Output
 }
 var file_proto_texc_proto_depIdxs = []int32{
-	0, // 0: proto.TexcService.Sync:input_type -> proto.Data
-	0, // 1: proto.TexcService.Sync:output_type -> proto.Data
+	0, // 0: proto.TexcService.Sync:input_type -> proto.Input
+	1, // 1: proto.TexcService.Sync:output_type -> proto.Output
 	1, // [1:2] is the sub-list for method output_type
 	0, // [0:1] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
@@ -122,7 +191,19 @@ func file_proto_texc_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_proto_texc_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Data); i {
+			switch v := v.(*Input); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_proto_texc_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Output); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -140,7 +221,7 @@ func file_proto_texc_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_proto_texc_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   1,
+			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
@@ -187,8 +268,8 @@ func (c *texcServiceClient) Sync(ctx context.Context, opts ...grpc.CallOption) (
 }
 
 type TexcService_SyncClient interface {
-	Send(*Data) error
-	Recv() (*Data, error)
+	Send(*Input) error
+	Recv() (*Output, error)
 	grpc.ClientStream
 }
 
@@ -196,12 +277,12 @@ type texcServiceSyncClient struct {
 	grpc.ClientStream
 }
 
-func (x *texcServiceSyncClient) Send(m *Data) error {
+func (x *texcServiceSyncClient) Send(m *Input) error {
 	return x.ClientStream.SendMsg(m)
 }
 
-func (x *texcServiceSyncClient) Recv() (*Data, error) {
-	m := new(Data)
+func (x *texcServiceSyncClient) Recv() (*Output, error) {
+	m := new(Output)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -230,8 +311,8 @@ func _TexcService_Sync_Handler(srv interface{}, stream grpc.ServerStream) error 
 }
 
 type TexcService_SyncServer interface {
-	Send(*Data) error
-	Recv() (*Data, error)
+	Send(*Output) error
+	Recv() (*Input, error)
 	grpc.ServerStream
 }
 
@@ -239,12 +320,12 @@ type texcServiceSyncServer struct {
 	grpc.ServerStream
 }
 
-func (x *texcServiceSyncServer) Send(m *Data) error {
+func (x *texcServiceSyncServer) Send(m *Output) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func (x *texcServiceSyncServer) Recv() (*Data, error) {
-	m := new(Data)
+func (x *texcServiceSyncServer) Recv() (*Input, error) {
+	m := new(Input)
 	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
 	}

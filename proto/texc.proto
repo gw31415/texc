@@ -2,9 +2,15 @@ syntax = "proto3";
 package proto;
 
 service TexcService {
-	rpc Sync (stream Data) returns (stream Data) {}
+	rpc Sync (stream Input) returns (stream Output) {}
 }
 
-message Data {
+message Input {
 	bytes data = 1;
+	repeated string exec = 2;
+}
+
+message Output {
+	bytes data = 1;
+	bytes stdout = 2;
 }
