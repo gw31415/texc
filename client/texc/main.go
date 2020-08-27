@@ -18,6 +18,10 @@ import (
 	"google.golang.org/grpc"
 )
 
+const (
+	block_size = 0xffff
+)
+
 func main() {
 	defer func() {
 		if e := recover(); e != nil {
@@ -56,8 +60,14 @@ func main() {
 	}
 	for _, path := range paths {
 		fmt.Println(path)
-		stat, _ := os.Stat(path)
 		f, err := os.OpenFile(path, os.O_RDONLY, 0755)
+		if err != nil {
+			panic(err)
+		}
+		stat, err := f.Stat()
+		if err != nil {
+			panic(err)
+		}
 		tar_w.WriteHeader(&tar.Header{
 			Name:    path,
 			Mode:    int64(stat.Mode()),
@@ -69,8 +79,9 @@ func main() {
 		}
 		io.Copy(tar_w, f)
 	}
+	tar_w.Close()
 	in_pb := new(proto.Input)
-	in_pb.Data = make([]byte, 0xffff)
+	in_pb.Data = make([]byte, block_size)
 	for {
 		_, err := tar_data.Read(in_pb.Data)
 		if err == io.EOF {
@@ -86,25 +97,18 @@ func main() {
 		})
 	}
 	stream.CloseSend()
-	out_ch := make(chan int)
-	go func() {
-		err_count := 0
-		for {
-			out, err := stream.Recv()
-			if err == io.EOF {
-				break
-			}
-			if err != nil {
-				err_count++
-				fmt.Println(err.Error())
-			}
-			if out.Stdout != nil {
-				os.Stdout.Write(out.Stdout)
-			}
+	for {
+		out, err := stream.Recv()
+		if err == io.EOF {
+			break
 		}
-		out_ch <- err_count
-	}()
-	<-out_ch
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		if out.Stdout != nil {
+			os.Stdout.Write(out.Stdout)
+		}
+	}
 }
 
 func dirwalk(dir string) ([]string, error) {
