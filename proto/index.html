@@ -175,11 +175,15 @@
         
           
           <li>
-            <a href="#proto%2ftexc.proto">proto/texc.proto</a>
+            <a href="#texc.proto">texc.proto</a>
             <ul>
               
                 <li>
-                  <a href="#proto.Data"><span class="badge">M</span>Data</a>
+                  <a href="#proto.Input"><span class="badge">M</span>Input</a>
+                </li>
+              
+                <li>
+                  <a href="#proto.Output"><span class="badge">M</span>Output</a>
                 </li>
               
               
@@ -199,12 +203,12 @@
     
       
       <div class="file-heading">
-        <h2 id="proto/texc.proto">proto/texc.proto</h2><a href="#title">Top</a>
+        <h2 id="texc.proto">texc.proto</h2><a href="#title">Top</a>
       </div>
       <p></p>
 
       
-        <h3 id="proto.Data">Data</h3>
+        <h3 id="proto.Input">Input</h3>
         <p></p>
 
         
@@ -216,6 +220,44 @@
               
                 <tr>
                   <td>data</td>
+                  <td><a href="#bytes">bytes</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>exec</td>
+                  <td><a href="#string">string</a></td>
+                  <td>repeated</td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="proto.Output">Output</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>data</td>
+                  <td><a href="#bytes">bytes</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+                <tr>
+                  <td>stdout</td>
                   <td><a href="#bytes">bytes</a></td>
                   <td></td>
                   <td><p> </p></td>
@@ -244,8 +286,8 @@
             
               <tr>
                 <td>Sync</td>
-                <td><a href="#proto.Data">Data</a> stream</td>
-                <td><a href="#proto.Data">Data</a> stream</td>
+                <td><a href="#proto.Input">Input</a> stream</td>
+                <td><a href="#proto.Output">Output</a> stream</td>
                 <td><p></p></td>
               </tr>
             
