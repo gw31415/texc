@@ -127,6 +127,7 @@ func (sv *TexcServiceServer) Sync(stream pb.TexcService_SyncServer) error {
 					Stderr: stderr.Bytes(),
 				},
 			)
+			return errors.New(fmt.Sprintf("process exited with error code %d", cmd.ProcessState.ExitCode()))
 		}
 	}
 	tar_data := bytes.NewBuffer([]byte{})

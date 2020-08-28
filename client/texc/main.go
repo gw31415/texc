@@ -124,8 +124,7 @@ func main() {
 			os.Stdout.Write(out.Stdout)
 		}
 		if out.Stderr != nil {
-			os.Stdout.Write(out.Stderr)
-			break
+			os.Stderr.Write(out.Stderr)
 		}
 		if out.Data != nil {
 			dl = true
@@ -152,7 +151,7 @@ func main() {
 					panic(err)
 				}
 				io.Copy(file, tr)
-				fmt.Printf(" -- %s\n", h.Name)
+				fmt.Printf("Download: %s\n", h.Name)
 			}
 		}
 	}
