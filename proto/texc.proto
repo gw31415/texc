@@ -8,9 +8,11 @@ service TexcService {
 message Input {
 	bytes data = 1;
 	repeated string exec = 2;
+	string dl = 3;
 }
 
 message Output {
 	bytes data = 1;
 	bytes stdout = 2;
+	bytes stderr = 3;
 }

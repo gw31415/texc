@@ -12,17 +12,34 @@ import (
 	"google.golang.org/grpc"
 )
 
+const (
+	port = ":3475"
+)
+
 func main() {
-	lis, _ := net.Listen("unix", "/home/ama/texcd.sock")
+	defer func() {
+		if e := recover(); e != nil {
+			switch e := e.(type) {
+			case error:
+				fmt.Println(e.Error())
+			case string:
+				fmt.Println(e)
+			default:
+				fmt.Println(e)
+			}
+		}
+		os.Exit(1)
+	}()
+	lis, _ := net.Listen("tcp", port)
 	defer lis.Close()
 	opts := []grpc.ServerOption{}
-	wd, _ := os.Getwd()
 	grpcServer := grpc.NewServer(opts...)
-	wd += "/temp"
-	if f, err := os.Stat(wd); os.IsNotExist(err) {
-		os.Mkdir(wd, 0755)
-	} else if !f.IsDir() {
-		panic(err)
+	if len(os.Args) != 2 {
+		panic("please specify the temp directory.")
+	}
+	wd := os.Args[1]
+	if f, err := os.Stat(wd); os.IsNotExist(err) || !f.IsDir() {
+		panic("directory not found.")
 	}
 	sv, err := server.NewTexcServiceServer(wd)
 	if err != nil {
@@ -31,6 +48,18 @@ func main() {
 	proto.RegisterTexcServiceServer(grpcServer, sv)
 	go grpcServer.Serve(lis)
 	defer grpcServer.Stop()
+	defer func() {
+		if e := recover(); e != nil {
+			switch e := e.(type) {
+			case error:
+				fmt.Println(e.Error())
+			case string:
+				fmt.Println(e)
+			default:
+				fmt.Println(e)
+			}
+		}
+	}()
 	// SIGINT待ち
 	fmt.Println("Press Ctrl-C to exit.")
 	sc := make(chan os.Signal, 1)

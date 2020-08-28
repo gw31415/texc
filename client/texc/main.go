@@ -2,19 +2,16 @@ package main
 
 import (
 	"archive/tar"
-	"bufio"
 	"bytes"
 	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
-	"net"
 	"os"
 	"path/filepath"
-	"strings"
-	"time"
 
 	"github.com/gw31415/texc/proto"
+	"golang.org/x/crypto/ssh/terminal"
 	"google.golang.org/grpc"
 )
 
@@ -33,16 +30,16 @@ func main() {
 			default:
 				fmt.Println(e)
 			}
-			return
+			os.Exit(1)
 		}
 	}()
 	if len(os.Args) != 2 {
-		panic("Args length does not match.")
+		panic("please specify the main tex file.")
 	}
-	dialer := func(a string, t time.Duration) (net.Conn, error) {
-		return net.Dial("unix", a)
+	if _, err := os.Stat(os.Args[1]); os.IsNotExist(err) {
+		panic("file not found.")
 	}
-	conn, err := grpc.Dial(os.Args[1], grpc.WithInsecure(), grpc.WithDialer(dialer))
+	conn, err := grpc.Dial("127.0.0.1:3475", grpc.WithInsecure())
 	if err != nil {
 		panic(err)
 	}
@@ -58,8 +55,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	var total_size int64 = 0
 	for _, path := range paths {
-		fmt.Println(path)
 		f, err := os.OpenFile(path, os.O_RDONLY, 0755)
 		if err != nil {
 			panic(err)
@@ -78,35 +75,85 @@ func main() {
 			panic(err)
 		}
 		io.Copy(tar_w, f)
+		total_size += stat.Size()
+		fmt.Printf("Add: %s\n", path)
 	}
 	tar_w.Close()
 	in_pb := new(proto.Input)
 	in_pb.Data = make([]byte, block_size)
+	var sent_size int = 0
+	send_status := "Send: %d%%\n"
+	if terminal.IsTerminal(int(os.Stdout.Fd())) {
+		send_status = "\rSend: %d%%"
+	}
 	for {
-		_, err := tar_data.Read(in_pb.Data)
+		i, err := tar_data.Read(in_pb.Data)
+		sent_size += i
 		if err == io.EOF {
 			break
 		}
 		stream.Send(in_pb)
+		percent := int64(sent_size) * 100 / total_size
+		if percent > 99 {
+			percent = 99
+		}
+		fmt.Printf(send_status, percent)
 	}
-	scan := bufio.NewScanner(os.Stdin)
-	for scan.Scan() {
-		fields := strings.Fields(scan.Text())
-		stream.Send(&proto.Input{
-			Exec: fields,
-		})
+	fmt.Printf(send_status, 100)
+	if terminal.IsTerminal(int(os.Stdout.Fd())) {
+		fmt.Println()
 	}
+	stream.Send(&proto.Input{
+		Exec: []string{"latexmk", os.Args[1]},
+	})
+	stream.Send(&proto.Input{
+		Dl: getFileNameWithoutExt(os.Args[1]) + ".pdf",
+	})
 	stream.CloseSend()
+	dl := false
+	b := new(bytes.Buffer)
 	for {
 		out, err := stream.Recv()
 		if err == io.EOF {
 			break
 		}
 		if err != nil {
-			fmt.Println(err.Error())
+			panic(err)
 		}
 		if out.Stdout != nil {
 			os.Stdout.Write(out.Stdout)
+		}
+		if out.Stderr != nil {
+			os.Stdout.Write(out.Stderr)
+			break
+		}
+		if out.Data != nil {
+			dl = true
+			b.Write(out.Data)
+		}
+	}
+	if dl {
+		tr := tar.NewReader(b)
+		for {
+			h, err := tr.Next()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				panic(err)
+			}
+			wd, _ := os.Getwd()
+			path := fmt.Sprintf("%s/%s", wd, h.Name)
+			dir := filepath.Dir(path)
+			if !h.FileInfo().IsDir() {
+				os.MkdirAll(dir, 0755)
+				file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0744)
+				if err != nil {
+					panic(err)
+				}
+				io.Copy(file, tr)
+				fmt.Printf(" -- %s\n", h.Name)
+			}
 		}
 	}
 }
@@ -129,4 +176,8 @@ func dirwalk(dir string) ([]string, error) {
 		paths = append(paths, filepath.Join(dir, file.Name()))
 	}
 	return paths, nil
+}
+
+func getFileNameWithoutExt(path string) string {
+	return filepath.Base(path[:len(path)-len(filepath.Ext(path))])
 }
