@@ -39,7 +39,7 @@ func main() {
 	if _, err := os.Stat(os.Args[1]); os.IsNotExist(err) {
 		panic("file not found.")
 	}
-	conn, err := grpc.Dial("127.0.0.1:3475", grpc.WithInsecure())
+	conn, err := grpc.Dial("texc.amas.dev:3475", grpc.WithInsecure())
 	if err != nil {
 		panic(err)
 	}
