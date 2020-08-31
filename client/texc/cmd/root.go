@@ -57,6 +57,8 @@ var (
 	address    string
 	block_size int
 	verbose    bool
+	jpg        bool
+	filename   string
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -122,6 +124,9 @@ var rootCmd = &cobra.Command{
 			if err == io.EOF {
 				break
 			}
+			if err != nil {
+				return err
+			}
 			stream.Send(in_pb)
 			percent := int64(sent_size) * 100 / total_size
 			if percent > 99 {
@@ -136,9 +141,21 @@ var rootCmd = &cobra.Command{
 		stream.Send(&proto.Input{
 			Exec: []string{"latexmk", args[0]},
 		})
-		stream.Send(&proto.Input{
-			Dl: getFileNameWithoutExt(args[0]) + ".pdf",
-		})
+		if jpg {
+			stream.Send(&proto.Input{
+				Exec: []string{"pdfcrop", "--margins", "20", getFileNameWithoutExt(args[0]) + ".pdf", getFileNameWithoutExt(args[0]) + ".pdf"},
+			})
+			stream.Send(&proto.Input{
+				Exec: []string{"bash", "-c", "pdftoppm -singlefile -jpeg -r 400 " + getFileNameWithoutExt(args[0]) + ".pdf > " + getFileNameWithoutExt(args[0]) + ".jpeg"},
+			})
+			stream.Send(&proto.Input{
+				Dl: getFileNameWithoutExt(args[0]) + ".jpeg",
+			})
+		} else {
+			stream.Send(&proto.Input{
+				Dl: getFileNameWithoutExt(args[0]) + ".pdf",
+			})
+		}
 		stream.CloseSend()
 		dl := false
 		b := new(bytes.Buffer)
@@ -152,8 +169,7 @@ var rootCmd = &cobra.Command{
 			}
 			if out.Stdout != nil {
 				if verbose {
-
-				os.Stdout.Write(out.Stdout)
+					os.Stdout.Write(out.Stdout)
 				} else {
 					fmt.Print(".")
 				}
@@ -242,6 +258,8 @@ func init() {
 	rootCmd.Flags().StringVar(&address, "address", "texc.amas.dev:3475", `address of Texc server`)
 	rootCmd.Flags().IntVar(&block_size, "block-size", 0xffff, `block size of sending file`)
 	rootCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "view output in detail")
+	rootCmd.Flags().BoolVarP(&jpg, "jpeg", "j", false, `set output filetype jpeg`)
+	rootCmd.Flags().StringVarP(&filename, "output", "o", "", `set output filename`)
 }
 
 // initConfig reads in config file and ENV variables if set.
