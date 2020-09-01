@@ -9,6 +9,7 @@ message Input {
 	bytes data = 1;
 	repeated string exec = 2;
 	string dl = 3;
+	bool no_out_stream = 4;
 }
 
 message Output {

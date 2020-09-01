@@ -40,10 +40,15 @@ func NewTexcServiceServer(cache_dir string) (*TexcServiceServer, error) {
 
 var randSrc = rand.NewSource(time.Now().UnixNano())
 
+type exec_unit struct {
+	exec          []string
+	no_out_stream bool
+}
+
 func (sv *TexcServiceServer) Sync(stream pb.TexcService_SyncServer) error {
 	done := make(chan error, 1)
 	go func() {
-		execs := make([][]string, 0)
+		var execs []*exec_unit
 		b := new(bytes.Buffer)
 		dl_filelist := make([]string, 0)
 		for {
@@ -59,7 +64,10 @@ func (sv *TexcServiceServer) Sync(stream pb.TexcService_SyncServer) error {
 				b.Write(in.Data)
 			}
 			if in.Exec != nil {
-				execs = append(execs, in.Exec)
+				execs = append(execs, &exec_unit{
+					exec:          in.Exec,
+					no_out_stream: in.NoOutStream,
+				})
 			}
 			if in.Dl != "" {
 				dl_filelist = append(dl_filelist, in.Dl)
@@ -98,45 +106,76 @@ func (sv *TexcServiceServer) Sync(stream pb.TexcService_SyncServer) error {
 			}
 		}
 		for _, exe := range execs {
-			cmd := exec.Command(exe[0], exe[1:]...)
-			cmd.Dir = cache_dir
-			stdout, err := cmd.StdoutPipe()
+			cmd := exec.Command(exe.exec[0], exe.exec[1:]...)
 			stderr := bytes.NewBuffer([]byte{})
-			cmd.Stderr = stderr
-			if err != nil {
-				done <- err
-				return
-			}
-			if err := cmd.Start(); err != nil {
-				done <- err
-				return
-			}
-			buf := make([]byte, 0xff)
-			for {
-				i, err := stdout.Read(buf)
-				if i > 0 {
+			cmd.Dir = cache_dir
+			if exe.no_out_stream {
+				cmd.Run()
+				if cmd.ProcessState.ExitCode() != 0 {
+					out, err := cmd.CombinedOutput()
+					if err != nil {
+						done <- err
+						return
+					}
 					stream.Send(
 						&pb.Output{
-							Stdout: buf,
+							Stdout: out,
+							Stderr: stderr.Bytes(),
 						},
 					)
+					done <- errors.New(fmt.Sprintf("process exited with error code %d", cmd.ProcessState.ExitCode()))
+					return
 				}
-				if err == io.EOF {
-					break
-				}
+				out, err := cmd.CombinedOutput()
 				if err != nil {
 					done <- err
 					return
 				}
-			}
-			if cmd.Wait(); cmd.ProcessState.ExitCode() != 0 {
 				stream.Send(
 					&pb.Output{
-						Stderr: stderr.Bytes(),
+						Stdout: out,
 					},
 				)
-				done <- errors.New(fmt.Sprintf("process exited with error code %d", cmd.ProcessState.ExitCode()))
+				done <- nil
 				return
+			} else {
+				stdout, err := cmd.StdoutPipe()
+				cmd.Stderr = stderr
+				if err != nil {
+					done <- err
+					return
+				}
+				if err := cmd.Start(); err != nil {
+					done <- err
+					return
+				}
+				buf := make([]byte, 0xff)
+				for {
+					i, err := stdout.Read(buf)
+					if i > 0 {
+						stream.Send(
+							&pb.Output{
+								Stdout: buf,
+							},
+						)
+					}
+					if err == io.EOF {
+						break
+					}
+					if err != nil {
+						done <- err
+						return
+					}
+				}
+				if cmd.Wait(); cmd.ProcessState.ExitCode() != 0 {
+					stream.Send(
+						&pb.Output{
+							Stderr: stderr.Bytes(),
+						},
+					)
+					done <- errors.New(fmt.Sprintf("process exited with error code %d", cmd.ProcessState.ExitCode()))
+					return
+				}
 			}
 		}
 		tar_data := bytes.NewBuffer([]byte{})

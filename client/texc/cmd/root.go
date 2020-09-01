@@ -143,17 +143,17 @@ var rootCmd = &cobra.Command{
 		})
 		if jpg {
 			stream.Send(&proto.Input{
-				Exec: []string{"pdfcrop", "--margins", "20", getFileNameWithoutExt(args[0]) + ".pdf", getFileNameWithoutExt(args[0]) + ".pdf"},
+				Exec:        []string{"pdfcrop", "--margins", "20", getFileNameWithoutExt(args[0]) + ".pdf", getFileNameWithoutExt(args[0]) + ".pdf"},
 			})
 			stream.Send(&proto.Input{
-				Exec: []string{"bash", "-c", "pdftoppm -singlefile -jpeg -r 400 " + getFileNameWithoutExt(args[0]) + ".pdf > " + getFileNameWithoutExt(args[0]) + ".jpeg"},
+				Exec:        []string{"bash", "-c", "pdftoppm -singlefile -jpeg -r 400 " + getFileNameWithoutExt(args[0]) + ".pdf > " + getFileNameWithoutExt(args[0]) + ".jpeg"},
 			})
 			stream.Send(&proto.Input{
-				Dl: getFileNameWithoutExt(args[0]) + ".jpeg",
+				Dl:          getFileNameWithoutExt(args[0]) + ".jpeg",
 			})
 		} else {
 			stream.Send(&proto.Input{
-				Dl: getFileNameWithoutExt(args[0]) + ".pdf",
+				Dl:          getFileNameWithoutExt(args[0]) + ".pdf",
 			})
 		}
 		stream.CloseSend()
