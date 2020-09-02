@@ -1,3 +1,6 @@
+/*
+Texcのサーバーインスタンスです.
+*/
 package server
 
 import (
@@ -16,25 +19,34 @@ import (
 	pb "github.com/gw31415/texc/proto"
 )
 
-const (
-	block_size = 0xffff
-)
-
+// Texcのサーバーインスタンス
 type TexcServiceServer struct {
 	pb.TexcServiceServer
-	cache_dir string
+	cache_dir      string
+	cmd_white_list []string
+	Timeout        time.Duration // タイムアウト時間
+	BlockSize      int64         // 送信時のブロックサイズ
 }
 
-func NewTexcServiceServer(cache_dir string) (*TexcServiceServer, error) {
-	if f, err := os.Stat(cache_dir); os.IsNotExist(err) || !f.IsDir() {
+type TexcServiceServerConfig struct {
+	CacheDir     string   // 一時ファイル用ディレクトリ
+	CmdWhiteList []string // 許可するコマンド一覧
+}
+
+// Texcのサーバーインスタンスを作成します
+func NewTexcServiceServer(config *TexcServiceServerConfig) (*TexcServiceServer, error) {
+	if f, err := os.Stat(config.CacheDir); os.IsNotExist(err) || !f.IsDir() {
 		return nil, err
 	}
-	abs_path, err := filepath.Abs(cache_dir)
+	abs_path, err := filepath.Abs(config.CacheDir)
 	if err != nil {
 		return nil, err
 	}
 	return &TexcServiceServer{
-		cache_dir: abs_path,
+		cmd_white_list: config.CmdWhiteList,
+		cache_dir:      abs_path,
+		Timeout:        time.Second * 30,
+		BlockSize:      0xffff,
 	}, nil
 }
 
@@ -45,9 +57,11 @@ type exec_unit struct {
 	no_out_stream bool
 }
 
+// 呼びだされるSync関数
 func (sv *TexcServiceServer) Sync(stream pb.TexcService_SyncServer) error {
 	done := make(chan error, 1)
 	go func() {
+		// データの受けとり
 		var execs []*exec_unit
 		b := new(bytes.Buffer)
 		dl_filelist := make([]string, 0)
@@ -73,14 +87,18 @@ func (sv *TexcServiceServer) Sync(stream pb.TexcService_SyncServer) error {
 				dl_filelist = append(dl_filelist, in.Dl)
 			}
 		}
-		tr := tar.NewReader(b)
+		// 一時ファイル用のディレクトリのセットアップ
 		new_dir := strconv.FormatInt(randSrc.Int63(), 16)
 		fmt.Printf("Login: %s\n", new_dir)
 		cache_dir := fmt.Sprintf("%s/%s/", sv.cache_dir, new_dir)
+		// 後処理の設定
 		defer func() {
 			os.RemoveAll(cache_dir)
 			fmt.Printf("Logout: %s\n", new_dir)
 		}()
+
+		// Tarの展開
+		tr := tar.NewReader(b)
 		for {
 			h, err := tr.Next()
 			if err == io.EOF {
@@ -105,10 +123,26 @@ func (sv *TexcServiceServer) Sync(stream pb.TexcService_SyncServer) error {
 				fmt.Printf(" -- %s\n", h.Name)
 			}
 		}
+
+		// コマンドの処理
 		for _, exe := range execs {
+			// ホワイトリスト処理
+			is_include := false
+			for _, e := range sv.cmd_white_list {
+				if exe.exec[0] == e {
+					is_include = true
+					break
+				}
+			}
+			if !is_include {
+				done <- errors.New("this command is not allowed.")
+				return
+			}
+			// cmdインスタンス
 			cmd := exec.Command(exe.exec[0], exe.exec[1:]...)
 			stderr := bytes.NewBuffer([]byte{})
 			cmd.Dir = cache_dir
+			// リアルタイム出力なし
 			if exe.no_out_stream {
 				cmd.Run()
 				if cmd.ProcessState.ExitCode() != 0 {
@@ -139,6 +173,7 @@ func (sv *TexcServiceServer) Sync(stream pb.TexcService_SyncServer) error {
 				done <- nil
 				return
 			} else {
+				// リアルタイム出力
 				stdout, err := cmd.StdoutPipe()
 				cmd.Stderr = stderr
 				if err != nil {
@@ -178,6 +213,8 @@ func (sv *TexcServiceServer) Sync(stream pb.TexcService_SyncServer) error {
 				}
 			}
 		}
+
+		// Tarの作成
 		tar_data := bytes.NewBuffer([]byte{})
 		tar_w := tar.NewWriter(tar_data)
 		for _, file_name := range dl_filelist {
@@ -209,8 +246,10 @@ func (sv *TexcServiceServer) Sync(stream pb.TexcService_SyncServer) error {
 			fmt.Printf("Send: %s\n", file_name)
 		}
 		tar_w.Close()
+
+		// データの送信
 		out_pb := new(pb.Output)
-		out_pb.Data = make([]byte, block_size)
+		out_pb.Data = make([]byte, sv.BlockSize)
 		var sent_size int = 0
 		for {
 			i, err := tar_data.Read(out_pb.Data)
@@ -223,7 +262,7 @@ func (sv *TexcServiceServer) Sync(stream pb.TexcService_SyncServer) error {
 		done <- nil
 	}()
 	select {
-	case <-time.After(time.Second * 30):
+	case <-time.After(sv.Timeout):
 		return errors.New("timeout.")
 	case err := <-done:
 		return err

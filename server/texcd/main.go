@@ -41,7 +41,15 @@ func main() {
 	if f, err := os.Stat(wd); os.IsNotExist(err) || !f.IsDir() {
 		panic("directory not found.")
 	}
-	sv, err := server.NewTexcServiceServer(wd)
+	sv, err := server.NewTexcServiceServer(&server.TexcServiceServerConfig{
+		CacheDir: wd,
+		CmdWhiteList: []string{
+			"latexmk",
+			"pdftoppm",
+			"pdflatex",
+			"pdfcrop",
+		},
+	})
 	if err != nil {
 		panic(err)
 	}
